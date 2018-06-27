@@ -1,146 +1,196 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.SharePoint.Client.Taxonomy;
 using Microsoft.SharePoint.Client;
-using System.Security; 
+using System.Collections.Generic;
 
 namespace AddressBook
 {
     class Service
     {
-        public ClientContext context; 
-        public List list { get; set; }
-        public ListItemCollection listItemCollection { get; set; }
+        List<Contact> AllContacts = new List<Contact>(); 
 
-        public Service()
+        public Contact Add(Contact contact, Context context)
         {
-            context = new ClientContext(Constants.siteUrl);  //server running sharepoint
-            //Web web = context.Web;
-            //list = web.Lists.GetByTitle("AddressBook");  //retrieving the list: "AddressBook"
-            //CamlQuery query = new CamlQuery();
-            //query.ViewXml = "<View/>";
+            ListItemCreationInformation itemToAdd = new ListItemCreationInformation();
+            List list = GetList(context);
+         
+            ListItem newItem = list.AddItem(itemToAdd);
+            //contact.Id = newItem.Id;
+            newItem[Constants.Department] = "-1;#" + contact.Department + "|" + GetTerm(contact.Department.ToUpper(), context).Id.ToString();
+            newItem[Constants.FullName] = contact.Name;
+            newItem[Constants.Email] = contact.Email;
+            newItem[Constants.WorkAddress] = contact.Address;
+            newItem[Constants.CellPhone] = contact.MobileNumber;
 
-            //listItemCollection = list.GetItems(query);
-            //Load(context);
+            /**changing the managed term value to the suitable format: "-1;managedTermValue|guid" **/
+            newItem.Update();
+
+            context.clientContext.Load(newItem);
+            context.clientContext.ExecuteQuery();
+
+            contact.Id = newItem.Id;
+            return contact; 
         }
 
-        public bool Connect(SecureString password)
+        public Contact GetContact(int id,Context context, Contact contact)
         {
-            context.Credentials = new SharePointOnlineCredentials(Constants.loginName, password);
+            ListItem item = GetItem(id, context);
+            contact.Id = item.Id;
+            contact.Name = item[Constants.FullName] as string;
+            contact.MobileNumber = item[Constants.CellPhone] as string;
+            contact.Address = item[Constants.WorkAddress] as string;
 
-            //it will handle the exception thrown, if the credentials do not match
-            try
+            TaxonomyFieldValue taxonomyFieldValue = item[Constants.Department] as TaxonomyFieldValue;
+            contact.Department = taxonomyFieldValue.Label; 
+
+            return contact; 
+        }
+
+        public List<Contact> GetAllContacts(Context context)
+        {
+            ListItemCollection listItemCollection = GetListItemCollection(context); 
+            foreach(ListItem item in listItemCollection)
             {
-                context.ExecuteQuery();
+                TaxonomyFieldValue taxonomyFieldValue = item[Constants.Department] as TaxonomyFieldValue;
+                AllContacts.Add(new Contact(
+                        item.Id, 
+                        item[Constants.FullName] as string,
+                        item[Constants.CellPhone] as string,
+                        item[Constants.WorkAddress] as string,
+                        item[Constants.Email] as string,
+                        taxonomyFieldValue.Label as string
+                    )); 
+            }
+            return AllContacts; 
+        }
+
+        public Contact Update(int id, Contact contact, Context context)
+        {
+            ListItem itemToUpdate = GetItem(id, context);
+            itemToUpdate[Constants.Department] = "-1;#" + contact.Department + "|" + GetTerm(contact.Department.ToUpper(), context).Id.ToString();
+            itemToUpdate[Constants.FullName] = contact.Name;
+            itemToUpdate[Constants.CellPhone] = contact.MobileNumber;
+            itemToUpdate[Constants.WorkAddress] = contact.Address;
+            itemToUpdate[Constants.Email] = contact.Email;
+
+            itemToUpdate.Update();
+            context.clientContext.Load(itemToUpdate);
+            context.clientContext.Load(GetListItemCollection(context));
+
+            context.clientContext.ExecuteQuery();
+
+            return contact; 
+        }
+
+        public bool Delete(int id, Context context)
+        {
+            GetItem(id, context).DeleteObject();
+            context.clientContext.ExecuteQuery();
+
+            return true;
+        }
+
+        public ListItem GetItem(int id, Context context)
+        {
+            ListItemCollection listItemCollection = GetListItemCollection(context);
+            return listItemCollection.SingleOrDefault(item => item.Id.Equals(id));
+        }
+
+        public bool doIdExist(int id, Context context)
+        {
+            if (GetItem(id, context) != null)
+            {
                 return true;
             }
-            catch (Exception)
+            else
             {
                 return false;
             }
         }
 
-        public void Load(ClientContext context)
+        public List GetList(Context context)
         {
-            context.Load(list);
-            context.Load(listItemCollection); 
-            context.ExecuteQuery();
-        }
-
-        public SecureString GetPassword()
-        {
-            string input = Console.ReadLine();
-            if (string.IsNullOrWhiteSpace(input))
-                return null;
-            else
-            {
-                SecureString securePassword = new SecureString();
-                foreach (char c in input.ToCharArray())
-                    securePassword.AppendChar(c);
-                return securePassword;
-            }
-        }
-
-        public ListItem Add(Contact contact, ClientContext context)
-        {
-            ListItemCreationInformation itemToAdd = new ListItemCreationInformation();
-            ListItem newItem = list.AddItem(itemToAdd);
-            newItem[Constants.WorkAddress] = contact.Address;
-            newItem[Constants.FullName] = contact.Name;
-            newItem[Constants.Email] = contact.Email;
-            newItem[Constants.CellPhone] = contact.MobileNumber;
-
-            newItem.Update();
-            context.Load(list);
-            context.Load(listItemCollection);
+            Web web = context.clientContext.Web; 
+            List list = web.Lists.GetByTitle(Constants.listName);
+            context.clientContext.Load(list);
             
-            context.ExecuteQuery();
-            return newItem; 
+            context.clientContext.ExecuteQuery();
+
+            return list; 
         }
 
-        public ListItem Update(int id)
+        public ListItemCollection GetListItemCollection(Context context)
         {
-            //check whether the id is avaiable or not 
-            ListItem itemToUpdate = listItemCollection.SingleOrDefault(item => item.Id.Equals(id));
+            List list = GetList(context); 
+            CamlQuery query = new CamlQuery();
+            query.ViewXml = "<View/>";
 
-            return itemToUpdate; 
+            ListItemCollection listItemCollection = list.GetItems(query);
+
+            context.clientContext.Load(listItemCollection); 
+
+            context.clientContext.ExecuteQuery();
+
+            return listItemCollection; 
         }
-        //public void Update(ListItem item, Contact contactToUpdate)
-        //{
-        //    if (contactToUpdate.Name != null)
-        //    {
-        //        item[Field.FullName.ToString()] = contactToUpdate.Name;
-        //    }
 
-        //    if (contactToUpdate.MobileNumber != null)
-        //    {
-        //        item[Field.CellPhone.ToString()] = contactToUpdate.MobileNumber;
-        //    }
-
-        //    if (contactToUpdate.Address != null)
-        //    {
-        //        item[Field.WorkAddress.ToString()] = contactToUpdate.Address;
-        //    }
-
-        //    if (contactToUpdate.Email != null)
-        //    {
-        //        item[Field.Email.ToString()] = contactToUpdate.Email;
-        //    }
-        //    //switch(choice)
-        //    // {
-        //    //     case (int)Column.FULLNAME:
-        //    //                                 item[Field.FullName.ToString()] = contactToUpdate.Name;
-        //    //                                 break;
-        //    //     case (int)Column.MOBILENUMBER:
-        //    //                                 item[Field.CellPhone.ToString()] = contactToUpdate.MobileNumber;
-        //    //                                 break;
-        //    //     case (int)Column.EMAIL:
-        //    //                                 item[Field.Email.ToString()] = contactToUpdate.Email;
-        //    //                                 break;
-        //    //     case (int)Column.ADDRESS:
-        //    //                                 item[Field.WorkAddress.ToString()] = contactToUpdate.Address;
-        //    //                                 break;
-        //    // }
-        //    item.Update();
-        //}
-
-        public bool Delete(int id,ClientContext context)
+        public Term GetTerm(string department, Context context)
         {
-            /*check whether the id is avaiable or not*/
-            ListItem itemToDelete = listItemCollection.SingleOrDefault(item => item.Id.Equals(id));
+            TermCollection termCollection = GetTermCollection(context); 
 
-            if (itemToDelete != null)
-            {
-                itemToDelete.DeleteObject();
-                Load(context);
-                return true; 
-            }
-            else
-            {
-                return false; 
-            }
+            context.clientContext.ExecuteQuery(); 
+
+            return termCollection.SingleOrDefault(t => t.Name.ToString().ToUpper().Equals(department.ToUpper()));
+        }
+
+        public TermCollection GetTermCollection(Context context)
+        {
+            TaxonomySession taxonomySession = TaxonomySession.GetTaxonomySession(context.clientContext);
+            TermStore termStore = taxonomySession.GetDefaultSiteCollectionTermStore();
+            TermGroup termGroup = termStore.GetSiteCollectionGroup(context.clientContext.Site, false);
+            TermSet termSet = termGroup.TermSets.GetByName(Constants.termSetName);
+            TermCollection termCollection = termSet.GetAllTerms(); 
+            context.clientContext.Load(termCollection);
+
+            context.clientContext.ExecuteQuery();
+
+            return termCollection; 
+        }
+
+        public TermSet GetTermSet(Context context)
+        {
+            TaxonomySession taxonomySession = TaxonomySession.GetTaxonomySession(context.clientContext);
+            TermStore termStore = taxonomySession.GetDefaultSiteCollectionTermStore();
+            TermGroup termGroup = termStore.GetSiteCollectionGroup(context.clientContext.Site, false);
+            TermSet termSet = termGroup.TermSets.GetByName(Constants.termSetName);
+
+            context.clientContext.Load(termSet);
+            context.clientContext.ExecuteQuery();
+
+            return termSet; 
+        }
+
+        public TermStore GetTermStore(Context context)
+        {
+            TaxonomySession taxonomySession = TaxonomySession.GetTaxonomySession(context.clientContext);
+            TermStore termStore = taxonomySession.GetDefaultSiteCollectionTermStore();  
+            context.clientContext.Load(termStore);
+        
+            context.clientContext.ExecuteQuery();
+
+            return termStore; 
+        }
+
+        public void CreateTerm(Context context, string department)
+        {
+            TermSet termSet = GetTermSet(context); 
+            Term newTerm = termSet.CreateTerm(department.ToUpper(), Constants.lcid, Guid.NewGuid());
+
+            TermStore termStore = GetTermStore(context);
+            termStore.CommitAll();
+            context.clientContext.Load(GetTermCollection(context));
+            context.clientContext.ExecuteQuery();
         }
     }
 }

@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using Microsoft.SharePoint.Client.Taxonomy;
 
 namespace AddressBook
 {
-    class Validate
+    class Validate 
     {
-      
         public static int GetOption()
         {
             bool valid = false;
@@ -45,93 +43,87 @@ namespace AddressBook
             return input;
         }
 
-        public static string GetName()
+        public static string GetName(string name)
         {
-            string name = "";
-            bool valid = false;
-            while (!valid)
+            while(name == "" || !Regex.IsMatch(name, Constants.namePattern))
             {
-                if ((name = Console.ReadLine()) != null)
-                {
-                    if (Regex.IsMatch(name, Constants.namePattern))
-                    {
-                        valid = true; 
-                    }
-                    else
-                    {
-                        Console.Write("\nEnter the valid Name:");
-                    }
-                }
+                Console.Write("\nEnter the valid Name:");
+                name = Console.ReadLine(); 
             }
             return name;
         }
 
-        public static string GetEmail()
+        public static string GetEmail(string email)
         {
-            string email = "";
-            bool valid = false;
-
-            while (!valid)
+            while (email == "" || !Regex.IsMatch(email, Constants.emailPattern))
             {
-                if ((email = Console.ReadLine()) != null)
-                {
-                    if (Regex.IsMatch(email, Constants.emailPattern))
-                    {
-                        valid = true; 
-                    }
-                    else
-                    {
-                        Console.Write("\nEnter Valid Email Address:");
-                    }
-                }
+                Console.Write("\nEnter Valid Email Address:");
+                email = Console.ReadLine(); 
             }
             return email;
         }
 
-        public static string GetMobileNumber()
+        public static string GetMobileNumber(string mobileNumber)
         {
-            string mobileNumber = "";
-            bool valid = false;
-
-            while (!valid)
+            while (mobileNumber=="" || !Regex.IsMatch(mobileNumber, Constants.mobileNumberPattern))
             {
-                if ((mobileNumber = Console.ReadLine()) != null)
-                {
-                    if (Regex.IsMatch(mobileNumber, Constants.mobileNumberPattern))
-                    {
-                        valid = true;
-                    }
-                    else
-                    {
-                        Console.Write("\nEnter 10 digit Mobile Number:");
-                    }
-                }
+                Console.Write("\nEnter 10 digit Mobile Number:");
+                mobileNumber = Console.ReadLine(); 
             }
             return mobileNumber;
         }
 
         public static string GetAddress()
         {
-            Console.WriteLine("\nPlease Enter \"Ctrl + Z\" to mark the End of Input");
-            string result = "";
-            string input = Console.ReadLine();
-            while (input != null||result =="")
-            {  
-                if (input!=null)
+            string address = "";
+            Console.WriteLine("\nPlease Enter \"Ctrl + Z\" to mark the End of Input after pressing enter");
+
+            string input = ""; 
+
+            while (input != null || address == "")
+            {
+                if (input != null)
                 {
                     if (!input.Equals(ConsoleKey.Enter))
                     {
-                        result += input + "\n"; 
+                        address += input + "\n";
                     }
                 }
-                if(result =="")
+                if (address == "" || input == "")
                 {
-                    Console.WriteLine("\nAddress cannot be Empty"); 
+                    Console.WriteLine("\nAddress cannot be Empty");
+                    input = null;
+                    address = "";
                 }
-                input = Console.ReadLine(); 
+                input = Console.ReadLine();
             }
 
-            return result.Trim(); 
+            return address.Trim(); 
+        }
+
+        public static string GetDepartment(string department,Context context)
+        { 
+            while (!Regex.IsMatch(department, Constants.departmentPattern))
+            {
+                Console.WriteLine("\nPlease Enter the Valid Department");
+                department = Console.ReadLine();
+            }
+
+            /**check to see whether the term exists or not**/
+            bool doExist = false;
+
+            Service service = new Service(); 
+            TermCollection termCollection = service.GetTermCollection(context); 
+
+            doExist = termCollection.Any(t => t.Name.ToUpper().Equals(department.ToUpper()));
+
+            /** if the deparment does not exist
+             * create a new department**/
+            if (!doExist)
+            {
+                service.CreateTerm(context,department);  
+            }
+            return department.ToUpper(); 
         }
 
         public static char GetValidChoice()
