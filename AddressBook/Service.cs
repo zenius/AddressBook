@@ -17,13 +17,13 @@ namespace AddressBook
          
             ListItem newItem = list.AddItem(itemToAdd);
             //contact.Id = newItem.Id;
+            /**changing the managed term value to the suitable format: "-1;managedTermValue|guid" **/
             newItem[Constants.Department] = "-1;#" + contact.Department + "|" + GetTerm(contact.Department.ToUpper(), context).Id.ToString();
             newItem[Constants.FullName] = contact.Name;
             newItem[Constants.Email] = contact.Email;
             newItem[Constants.WorkAddress] = contact.Address;
             newItem[Constants.CellPhone] = contact.MobileNumber;
-
-            /**changing the managed term value to the suitable format: "-1;managedTermValue|guid" **/
+            
             newItem.Update();
 
             context.clientContext.Load(newItem);
@@ -32,8 +32,26 @@ namespace AddressBook
             contact.Id = newItem.Id;
             return contact; 
         }
+        
+        public Contact Update(int id, Contact contact, Context context)
+        {
+            ListItem itemToUpdate = GetItem(id, context);
+            itemToUpdate[Constants.Department] = "-1;#" + contact.Department + "|" + GetTerm(contact.Department.ToUpper(), context).Id.ToString();
+            itemToUpdate[Constants.FullName] = contact.Name;
+            itemToUpdate[Constants.CellPhone] = contact.MobileNumber;
+            itemToUpdate[Constants.WorkAddress] = contact.Address;
+            itemToUpdate[Constants.Email] = contact.Email;
 
-        public Contact GetContact(int id,Context context, Contact contact)
+            itemToUpdate.Update();
+            context.clientContext.Load(itemToUpdate);
+            context.clientContext.Load(GetListItemCollection(context));
+
+            context.clientContext.ExecuteQuery();
+
+            return contact; 
+        }
+        
+         public Contact GetContact(int id,Context context, Contact contact)
         {
             ListItem item = GetItem(id, context);
             contact.Id = item.Id;
@@ -64,24 +82,7 @@ namespace AddressBook
             }
             return AllContacts; 
         }
-
-        public Contact Update(int id, Contact contact, Context context)
-        {
-            ListItem itemToUpdate = GetItem(id, context);
-            itemToUpdate[Constants.Department] = "-1;#" + contact.Department + "|" + GetTerm(contact.Department.ToUpper(), context).Id.ToString();
-            itemToUpdate[Constants.FullName] = contact.Name;
-            itemToUpdate[Constants.CellPhone] = contact.MobileNumber;
-            itemToUpdate[Constants.WorkAddress] = contact.Address;
-            itemToUpdate[Constants.Email] = contact.Email;
-
-            itemToUpdate.Update();
-            context.clientContext.Load(itemToUpdate);
-            context.clientContext.Load(GetListItemCollection(context));
-
-            context.clientContext.ExecuteQuery();
-
-            return contact; 
-        }
+        
 
         public bool Delete(int id, Context context)
         {
