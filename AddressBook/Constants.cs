@@ -18,13 +18,19 @@ namespace AddressBook
         public const string CellPhone = "CellPhone";
         public const string WorkAddress = "WorkAddress";
         public const string Email = "Email";
-        public const string Department = "Department"; 
+        public const string Department = "Department";   //managed metadata column
+        public const string MaritalStatus = "MaritalStatus";  //choice column
+        public const string Salary = "Salary"; //currency column
+        public const string DateOfBirth = "DateOfBirth";  // dateTime column
 
         /*regex expression for validation*/
         public const string namePattern = @"^[A-Za-z\s]+$";
         public const string  mobileNumberPattern = @"^[\d]{10}$";
         public const string emailPattern = @"^\w+([-.]\w+)*@\w+([.]\w+)*\.\w+$";
-        public const string departmentPattern = @"^[A-za-z\s]+$"; 
+        public const string departmentPattern = @"^[A-Za-z\s]+$";
+        public const string maritalStatusPattern = @"^[A-Z][a-z]+$";
+        public const string salaryPattern = @"^[1-9]\d*(\.\d+)?$";
+        public const string dateOfBirthPattern = @"^((0?[1-9])|(1[0-2]))/((0?[0-9])|([1-2][0-9])|(3[0-1]))/((19|20)\d{2})$"; 
 
         /*local identifier for english language(Default)*/
         public const int lcid = 1033;

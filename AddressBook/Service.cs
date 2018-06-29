@@ -14,71 +14,45 @@ namespace AddressBook
         {
             ListItemCreationInformation itemToAdd = new ListItemCreationInformation();
             List list = GetList(context);
-         
+
             ListItem newItem = list.AddItem(itemToAdd);
-            //contact.Id = newItem.Id;
+            /**changing the managed term value to the suitable format: "-1;managedTermValue|guid" **/
             newItem[Constants.Department] = "-1;#" + contact.Department + "|" + GetTerm(contact.Department.ToUpper(), context).Id.ToString();
+
             newItem[Constants.FullName] = contact.Name;
             newItem[Constants.Email] = contact.Email;
             newItem[Constants.WorkAddress] = contact.Address;
             newItem[Constants.CellPhone] = contact.MobileNumber;
+            newItem[Constants.MaritalStatus] = contact.MaritalStatus;
+            newItem[Constants.Salary] = contact.Salary;
+            newItem[Constants.DateOfBirth] = contact.DateOfBirth.ToString("mm/dd/yyyy");
 
-            /**changing the managed term value to the suitable format: "-1;managedTermValue|guid" **/
             newItem.Update();
-
-            context.clientContext.Load(newItem);
             context.clientContext.ExecuteQuery();
 
             contact.Id = newItem.Id;
             return contact; 
         }
 
-        public Contact GetContact(int id,Context context, Contact contact)
-        {
-            ListItem item = GetItem(id, context);
-            contact.Id = item.Id;
-            contact.Name = item[Constants.FullName] as string;
-            contact.MobileNumber = item[Constants.CellPhone] as string;
-            contact.Address = item[Constants.WorkAddress] as string;
-
-            TaxonomyFieldValue taxonomyFieldValue = item[Constants.Department] as TaxonomyFieldValue;
-            contact.Department = taxonomyFieldValue.Label; 
-
-            return contact; 
-        }
-
-        public List<Contact> GetAllContacts(Context context)
-        {
-            ListItemCollection listItemCollection = GetListItemCollection(context); 
-            foreach(ListItem item in listItemCollection)
-            {
-                TaxonomyFieldValue taxonomyFieldValue = item[Constants.Department] as TaxonomyFieldValue;
-                AllContacts.Add(new Contact(
-                        item.Id, 
-                        item[Constants.FullName] as string,
-                        item[Constants.CellPhone] as string,
-                        item[Constants.WorkAddress] as string,
-                        item[Constants.Email] as string,
-                        taxonomyFieldValue.Label as string
-                    )); 
-            }
-            return AllContacts; 
-        }
-
         public Contact Update(int id, Contact contact, Context context)
         {
             ListItem itemToUpdate = GetItem(id, context);
+
             itemToUpdate[Constants.Department] = "-1;#" + contact.Department + "|" + GetTerm(contact.Department.ToUpper(), context).Id.ToString();
             itemToUpdate[Constants.FullName] = contact.Name;
             itemToUpdate[Constants.CellPhone] = contact.MobileNumber;
             itemToUpdate[Constants.WorkAddress] = contact.Address;
             itemToUpdate[Constants.Email] = contact.Email;
+            itemToUpdate[Constants.MaritalStatus] = contact.MaritalStatus;
+            itemToUpdate[Constants.Salary] = contact.Salary;
+            itemToUpdate[Constants.DateOfBirth] = contact.DateOfBirth.ToString("mm/dd/yyyy");
 
             itemToUpdate.Update();
-            context.clientContext.Load(itemToUpdate);
-            context.clientContext.Load(GetListItemCollection(context));
 
             context.clientContext.ExecuteQuery();
+
+            /**getting the updated contact details**/
+            contact = GetContact(id, context, contact); 
 
             return contact; 
         }
@@ -91,6 +65,56 @@ namespace AddressBook
             return true;
         }
 
+        public Contact GetContact(int id, Context context, Contact contact)
+        {
+            ListItem item = GetItem(id, context);
+            contact.Id = item.Id;
+            contact.Name = item[Constants.FullName].ToString();
+            contact.MobileNumber = item[Constants.CellPhone].ToString();
+            contact.Address = item[Constants.WorkAddress].ToString();
+            contact.Email = item[Constants.Email].ToString(); 
+            contact.MaritalStatus = item[Constants.MaritalStatus].ToString();
+            contact.Salary = Convert.ToDouble(item[Constants.Salary].ToString());
+            contact.DateOfBirth = Convert.ToDateTime(item[Constants.DateOfBirth].ToString()); 
+            TaxonomyFieldValue taxonomyFieldValue = item[Constants.Department] as TaxonomyFieldValue;
+            contact.Department = taxonomyFieldValue.Label;
+     
+            return contact;
+        }
+
+        public List<Contact> GetAllContacts(Context context)
+        {
+            ListItemCollection listItemCollection = GetListItemCollection(context);
+
+            foreach (ListItem item in listItemCollection)
+            {
+                TaxonomyFieldValue taxonomyFieldValue = item[Constants.Department] as TaxonomyFieldValue;
+                AllContacts.Add(new Contact(
+                        item.Id,
+                        item[Constants.FullName].ToString(),
+                        item[Constants.CellPhone].ToString(),
+                        item[Constants.WorkAddress].ToString(),
+                        item[Constants.Email].ToString(),
+                        item[Constants.MaritalStatus].ToString(),
+                        Convert.ToDouble(item[Constants.Salary].ToString()),
+                        Convert.ToDateTime(item[Constants.DateOfBirth].ToString()),
+                        taxonomyFieldValue.Label
+                    ));
+            }
+            return AllContacts;
+        }
+
+        public FieldChoice GetMaritalStatusChoices(Context context)
+        {
+            Field field = GetList(context).Fields.GetByTitle(Constants.MaritalStatus);
+            FieldChoice maritalStatusChoices = context.clientContext.CastTo<FieldChoice>(field);
+
+            context.clientContext.Load(maritalStatusChoices);
+            context.clientContext.ExecuteQuery();
+
+            return maritalStatusChoices; 
+        }
+
         public ListItem GetItem(int id, Context context)
         {
             ListItemCollection listItemCollection = GetListItemCollection(context);
@@ -99,20 +123,14 @@ namespace AddressBook
 
         public bool doIdExist(int id, Context context)
         {
-            if (GetItem(id, context) != null)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return GetItem(id, context) != null ? true: false; 
         }
 
         public List GetList(Context context)
         {
             Web web = context.clientContext.Web; 
             List list = web.Lists.GetByTitle(Constants.listName);
+             
             context.clientContext.Load(list);
             
             context.clientContext.ExecuteQuery();
@@ -128,7 +146,17 @@ namespace AddressBook
 
             ListItemCollection listItemCollection = list.GetItems(query);
 
-            context.clientContext.Load(listItemCollection); 
+            context.clientContext.Load(listItemCollection, items => items.Include(
+                item => item.Id,
+                item => item[Constants.FullName],
+                item =>item[Constants.CellPhone],
+                item =>item[Constants.WorkAddress],
+                item => item[Constants.Email],
+                item => item[Constants.Department],
+                item => item[Constants.MaritalStatus],
+                item =>item[Constants.Salary],
+                item => item[Constants.DateOfBirth]
+            )); 
 
             context.clientContext.ExecuteQuery();
 

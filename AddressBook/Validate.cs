@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.SharePoint.Client; 
 using Microsoft.SharePoint.Client.Taxonomy;
+using System.Globalization; 
 
 namespace AddressBook
 {
@@ -126,6 +128,47 @@ namespace AddressBook
             return department.ToUpper(); 
         }
 
+        public static string GetMaritalStatus(string maritalStatus, Context context)
+        {
+            bool doExist = false;
+
+            Service service = new Service();
+            FieldChoice maritalStatusChoice = service.GetMaritalStatusChoices(context);
+            var maritalStatusChoices = maritalStatusChoice.Choices;
+
+            while(!doExist && !Regex.IsMatch(maritalStatus, Constants.maritalStatusPattern))
+            {
+                Console.WriteLine("\nPlease Enter the Valid maritalStatus [Single/Married]"); 
+                doExist = maritalStatusChoices.Any(t => t.ToString().ToUpper().Equals(maritalStatus.ToUpper()));
+                maritalStatus = Console.ReadLine();
+            }
+
+            return maritalStatus; 
+        }
+
+        public static double GetSalary(string salary)
+        {
+            while (salary == "" || !Regex.IsMatch(salary, Constants.salaryPattern))
+            {
+                Console.Write("\nEnter the Valid Salary [positive number or positive number with decimal]:");
+                salary = Console.ReadLine();
+            }
+            
+            return Convert.ToDouble(salary); 
+        }
+
+
+        public static DateTime GetDateOfBirth(string dateOfBirth)
+        {
+            while(dateOfBirth =="" || !Regex.IsMatch(dateOfBirth, Constants.dateOfBirthPattern))
+            {
+                Console.Write("\nEnter the Valid Date of Birth [mm/dd/yyyy] (yyyy = 1900-2099):");
+                dateOfBirth = Console.ReadLine();
+            }
+            DateTime formattedDateOfBirth = DateTime.ParseExact(dateOfBirth, "mm/dd/yyyy",CultureInfo.InvariantCulture);
+            
+            return formattedDateOfBirth; 
+        }
         public static char GetValidChoice()
         {
             char choice = Console.ReadKey().KeyChar;

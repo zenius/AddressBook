@@ -27,6 +27,9 @@ namespace AddressBook
             Console.WriteLine("\nAddress:{0}", contact.Address);
             Console.WriteLine("\nEmail:{0}", contact.Email);
             Console.WriteLine("\nDepartment:{0}", contact.Department);
+            Console.WriteLine("\nMarital Status:{0}", contact.MaritalStatus);
+            Console.WriteLine("\nSalary:{0}", contact.Salary);
+            Console.WriteLine("\nDate of Birth:{0}", contact.DateOfBirth.ToString("mm/dd/yyyy"));
             Console.WriteLine("\n************************************");
         }
 
@@ -42,7 +45,9 @@ namespace AddressBook
                 Console.WriteLine("\nAddress:{0}",contact.Address);
                 Console.WriteLine("\nEmail:{0}", contact.Email);
                 Console.WriteLine("\nDepartment:{0}", contact.Department);
-
+                Console.WriteLine("\nMarital Status:{0}", contact.MaritalStatus);
+                Console.WriteLine("\nSalary:{0}", contact.Salary);
+                Console.WriteLine("\nDate of Birth:{0}", contact.DateOfBirth.ToString("mm/dd/yyyy"));
                 Console.WriteLine("\n************************************"); 
             }
         }
@@ -76,6 +81,8 @@ namespace AddressBook
                         Console.Write("\nEnter the Option:");
                         int option = Validate.GetOption();
 
+                        List<Contact> allContacts; 
+
                         switch (option)
                         {
                             case Constants.ADD:
@@ -90,8 +97,17 @@ namespace AddressBook
                                 contactToAdd.Email = Validate.GetEmail(Console.ReadLine());
 
                                 Console.Write("\nEnter Department:");
-                                contactToAdd.Department = Validate.GetDepartment(Console.ReadLine(),context); 
+                                contactToAdd.Department = Validate.GetDepartment(Console.ReadLine(),context);
 
+                                Console.Write("\nEnter MaritalStatus:");
+                                contactToAdd.MaritalStatus = Validate.GetMaritalStatus(Console.ReadLine(), context);
+
+                                Console.Write("\nEnter Salary:");
+                                contactToAdd.Salary = Validate.GetSalary(Console.ReadLine());
+
+                                Console.Write("\nEnter Date Of Birth [mm/dd/yyyy] (yyyy = 1900-2099):");
+                                contactToAdd.DateOfBirth = Validate.GetDateOfBirth(Console.ReadLine());
+ 
                                 contactToAdd = service.Add(contactToAdd, context);
 
                                 Console.WriteLine("\nNew Contact Added Successfully");
@@ -101,7 +117,7 @@ namespace AddressBook
 
                                 break;
                             case Constants.UPDATE:
-                                List<Contact> allContacts = service.GetAllContacts(context);
+                               allContacts = service.GetAllContacts(context);
 
                                 /**display the list of contact available to the user**/
                                 ShowAllContacts(allContacts);
@@ -129,7 +145,6 @@ namespace AddressBook
                                     if (input != "")
                                     {
                                         contactToUpdate.Name = Validate.GetName(input); 
-                                        //itemToUpdate[Constants.FullName] = Validate.GetName(input);
                                     }
                                    
                                     Console.Write("\nMobile Number: ");
@@ -137,7 +152,6 @@ namespace AddressBook
                                     if (input != "")
                                     {
                                         contactToUpdate.MobileNumber = Validate.GetMobileNumber(input);
-                                         //itemToUpdate[Constants.CellPhone] = Validate.GetMobileNumber(input);
                                     }
 
                                     Console.Write("\nEmail: ");
@@ -145,16 +159,34 @@ namespace AddressBook
                                     if (input != "")
                                     {
                                        contactToUpdate.Email = Validate.GetEmail(input); 
-                                        //itemToUpdate[Constants.Email] = Validate.GetEmail(input);
                                     }
 
                                     Console.Write("\nDepartment: ");
                                     input = Console.ReadLine();
                                     if (input != "")
                                     {
-                                        //string _department = Validate.GetDepartment(input, context);
                                         contactToUpdate.Department = Validate.GetDepartment(input, context);
-                                        //itemToUpdate[Constants.Department] = "-1;#" + _department + "|" + service.GetTerm(_department.ToUpper(), context).Id.ToString();
+                                    }
+
+                                    Console.Write("\nEnter MaritalStatus:");
+                                    input = Console.ReadLine();
+                                    if(input!="")
+                                    {
+                                        contactToUpdate.MaritalStatus = Validate.GetMaritalStatus(input, context);
+                                    }
+                                  
+                                    Console.Write("\nEnter Salary:");
+                                    input = Console.ReadLine();
+                                    if (input != "")
+                                    {
+                                        contactToUpdate.Salary = Validate.GetSalary(input);
+                                    }
+
+                                    Console.Write("\nEnter Date of Birth[dd/mm/yyyy] (year = 1900-2099):");
+                                    input = Console.ReadLine();
+                                    if (input != "")
+                                    {
+                                        contactToUpdate.DateOfBirth = Validate.GetDateOfBirth(input);
                                     }
 
                                     contactToUpdate = service.Update(_id,contactToUpdate, context);
@@ -173,11 +205,11 @@ namespace AddressBook
 
                             case Constants.DELETE:
                                 /**display the list of contact available to the user**/
-                                List<Contact> Contacts = service.GetAllContacts(context);
+                                allContacts = service.GetAllContacts(context);
 
                                 Console.WriteLine("\n**************Available Contacts*************");
                                 /**display the list of contact available to the user**/
-                                ShowAllContacts(Contacts);
+                                ShowAllContacts(allContacts);
 
                                 Console.Write("\nEnter the Contact Id to DELETE: ");
                                 int id = Validate.GetId();
@@ -198,11 +230,11 @@ namespace AddressBook
                                 break;
 
                             case Constants.SHOW_ALL_CONTACTS:
-                                List<Contact> _allContacts = service.GetAllContacts(context);
+                                allContacts = service.GetAllContacts(context);
 
                                 Console.WriteLine("\n**************Available Contacts*************");
                                 /**display the list of contact available to the user**/
-                                ShowAllContacts(_allContacts);
+                                ShowAllContacts(allContacts);
 
                                 break;
 

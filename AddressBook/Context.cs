@@ -14,6 +14,7 @@ namespace AddressBook
         {
             clientContext = new ClientContext(ConfigurationManager.AppSettings["siteUrl"].ToString());
             clientContext.Credentials = new SharePointOnlineCredentials(ConfigurationManager.AppSettings["loginName"].ToString(),password);
+
             //to handle the error, if the  credentials do not match 
             try
             {
