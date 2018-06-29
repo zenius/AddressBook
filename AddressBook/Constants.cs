@@ -30,7 +30,7 @@ namespace AddressBook
         public const string departmentPattern = @"^[A-Za-z\s]+$";
         public const string maritalStatusPattern = @"^[A-Z][a-z]+$";
         public const string salaryPattern = @"^[1-9]\d*(\.\d+)?$";
-        public const string dateOfBirthPattern = @"^((0?[1-9])|(1[0-2]))/((0?[0-9])|([1-2][0-9])|(3[0-1]))/((19|20)\d{2})$"; 
+        public const string dateOfBirthPattern = @"^((0?[1-9])|(1[0-2]))/((0?[0-9])|([1-2][0-9])|(3[0-1]))/((19|20)\d{2})$"; // mm/dd/yyyy [yyyy = 1900-2099]
 
         /*local identifier for english language(Default)*/
         public const int lcid = 1033;
