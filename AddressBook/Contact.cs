@@ -1,4 +1,5 @@
 ﻿using System;
+//using Microsoft.SharePoint.Client; 
 
 namespace AddressBook
 {
@@ -13,6 +14,8 @@ namespace AddressBook
         public string MaritalStatus { get; set; }
         public double Salary { get; set; }
         public DateTime DateOfBirth { get; set; }
+        public bool Employed { get; set; }
+        public string Company { get; set; }
 
         public Contact() { }
 
@@ -25,6 +28,8 @@ namespace AddressBook
                         string MaritalStatus, 
                         double Salary,
                         DateTime DateOfBirth,
+                        bool Employed,
+                        string Company,
                         string Department
         )
         {
@@ -35,7 +40,9 @@ namespace AddressBook
             this.Address = Address;
             this.MaritalStatus = MaritalStatus;
             this.Salary = Salary;
-            this.DateOfBirth = DateOfBirth; 
+            this.DateOfBirth = DateOfBirth;
+            this.Employed = Employed;
+            this.Company = Company;
             this.Department = Department; 
         }
     }

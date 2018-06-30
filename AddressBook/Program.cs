@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Security;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Linq;
+//using System.Threading.Tasks;
+//using System.Linq;
 using System.Configuration; 
 
 namespace AddressBook
@@ -30,6 +30,8 @@ namespace AddressBook
             Console.WriteLine("\nMarital Status:{0}", contact.MaritalStatus);
             Console.WriteLine("\nSalary:{0}", contact.Salary);
             Console.WriteLine("\nDate of Birth:{0}", contact.DateOfBirth.ToString("mm/dd/yyyy"));
+            Console.WriteLine("\nEmployed:{0}", contact.Employed ? "Yes": "No");
+            Console.WriteLine("\nCompany:{0}", contact.Company);
             Console.WriteLine("\n************************************");
         }
 
@@ -48,6 +50,8 @@ namespace AddressBook
                 Console.WriteLine("\nMarital Status:{0}", contact.MaritalStatus);
                 Console.WriteLine("\nSalary:{0}", contact.Salary);
                 Console.WriteLine("\nDate of Birth:{0}", contact.DateOfBirth.ToString("mm/dd/yyyy"));
+                Console.WriteLine("\nEmployed:{0}", contact.Employed ? "Yes" : "No");
+                Console.WriteLine("\nCompany:{0}", contact.Company);
                 Console.WriteLine("\n************************************"); 
             }
         }
@@ -99,7 +103,7 @@ namespace AddressBook
                                 Console.Write("\nEnter Department:");
                                 contactToAdd.Department = Validate.GetDepartment(Console.ReadLine(),context);
 
-                                Console.Write("\nEnter MaritalStatus:");
+                                Console.Write("\nEnter Marital Status[Single|Married]:");
                                 contactToAdd.MaritalStatus = Validate.GetMaritalStatus(Console.ReadLine(), context);
 
                                 Console.Write("\nEnter Salary:");
@@ -107,7 +111,13 @@ namespace AddressBook
 
                                 Console.Write("\nEnter Date Of Birth [mm/dd/yyyy] (yyyy = 1900-2099):");
                                 contactToAdd.DateOfBirth = Validate.GetDateOfBirth(Console.ReadLine());
- 
+
+                                Console.Write("\nAre you Employed? [Yes/No]: Press y for 'yes' and 'n' for 'no': ");
+                                contactToAdd.Employed = Validate.IsEmployed(Console.ReadLine());
+
+                                Console.Write("\nEnter Company: ");
+                                contactToAdd.Company = Validate.GetCompany(Console.ReadLine(),context);
+
                                 contactToAdd = service.Add(contactToAdd, context);
 
                                 Console.WriteLine("\nNew Contact Added Successfully");
@@ -168,7 +178,7 @@ namespace AddressBook
                                         contactToUpdate.Department = Validate.GetDepartment(input, context);
                                     }
 
-                                    Console.Write("\nEnter MaritalStatus:");
+                                    Console.Write("\nEnter Marital Status[Single|Married]:");
                                     input = Console.ReadLine();
                                     if(input!="")
                                     {
@@ -187,6 +197,20 @@ namespace AddressBook
                                     if (input != "")
                                     {
                                         contactToUpdate.DateOfBirth = Validate.GetDateOfBirth(input);
+                                    }
+
+                                    Console.Write("\nAre you Employed? [Yes/No]: Press y for 'yes' and 'n' for 'no': ");
+                                    input = Console.ReadLine();
+                                    if (input != "")
+                                    {
+                                        contactToUpdate.Employed = Validate.IsEmployed(input);
+                                    }
+
+                                    Console.Write("\nEnter Company: ");
+                                    input = Console.ReadLine();
+                                    if (input != "")
+                                    {
+                                        contactToUpdate.Company = Validate.GetCompany(input, context);
                                     }
 
                                     contactToUpdate = service.Update(_id,contactToUpdate, context);

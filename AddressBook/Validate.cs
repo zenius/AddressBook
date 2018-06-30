@@ -138,7 +138,7 @@ namespace AddressBook
 
             while(!doExist && !Regex.IsMatch(maritalStatus, Constants.maritalStatusPattern))
             {
-                Console.WriteLine("\nPlease Enter the Valid maritalStatus [Single/Married]"); 
+                Console.Write("\nPlease Enter the Valid maritalStatus [Single/Married]"); 
                 doExist = maritalStatusChoices.Any(t => t.ToString().ToUpper().Equals(maritalStatus.ToUpper()));
                 maritalStatus = Console.ReadLine();
             }
@@ -160,21 +160,64 @@ namespace AddressBook
 
         public static DateTime GetDateOfBirth(string dateOfBirth)
         {
+            string[] dateFormats = {"mm/dd/yyyy", "m/d/yyyy", "mm/d/yyyy","m/d/yyyy" }; 
             while(dateOfBirth =="" || !Regex.IsMatch(dateOfBirth, Constants.dateOfBirthPattern))
             {
                 Console.Write("\nEnter the Valid Date of Birth [mm/dd/yyyy] (yyyy = 1900-2099):");
                 dateOfBirth = Console.ReadLine();
             }
-            DateTime formattedDateOfBirth = DateTime.ParseExact(dateOfBirth, "mm/dd/yyyy",CultureInfo.InvariantCulture);
-            
-            return formattedDateOfBirth; 
+
+           return DateTime.ParseExact(dateOfBirth, dateFormats, CultureInfo.InvariantCulture, DateTimeStyles.None); 
         }
+
+        public static bool IsEmployed(string employed)
+        {
+            bool isEmployed = false; 
+            while (!Regex.IsMatch(employed, Constants.employedPattern))
+            {
+                Console.Write("\nPlease enter valid option");
+                Console.Write("\nAre you Employed? [Yes/No] Press y for 'yes' and 'n' for 'no': "); 
+                employed = Console.ReadLine();
+            }
+           
+            if(employed.Equals("y") || employed.Equals("Y"))  { isEmployed = true; }
+            else  if(employed.Equals("n") || employed.Equals("N")) { isEmployed = false; }
+
+            return isEmployed; 
+        }
+
+        public static string GetCompany(string company, Context context)
+        {
+            bool doExist = false; 
+
+            Service service = new Service();
+            ListItemCollection lookupListItemCollection = service.GetListItemCollection(context,Constants.lookupListName);
+
+            Console.WriteLine("\nAvailable Company List");
+
+            foreach(ListItem _company in lookupListItemCollection)
+            {
+                Console.WriteLine("\n{0}",_company["Title"]); 
+            }
+
+            doExist = lookupListItemCollection.Any(t => t[Constants.Title].ToString().Equals(company)); 
+
+            while (!doExist /*&& !Regex.IsMatch(company, Constants.companyPattern)*/)
+            {
+                Console.Write("\nPlease Enter the Valid Company Name: ");
+                company = Console.ReadLine();
+                doExist = lookupListItemCollection.Any(t => t[Constants.Title].ToString().Equals(company));
+            }
+
+            return company;
+        }
+
         public static char GetValidChoice()
         {
             char choice = Console.ReadKey().KeyChar;
             while (choice != 'y' && choice != 'Y' && choice != 'n' && choice != 'N')
             {
-                Console.Write("\nplease enter the valid continue choice('y' for yes /'n' for no): ");
+                Console.Write("\nPlease enter the valid continue choice('y' for yes /'n' for no): ");
                 choice = Console.ReadKey().KeyChar;
             }
             return choice;
