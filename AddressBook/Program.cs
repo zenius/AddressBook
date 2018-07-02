@@ -30,8 +30,10 @@ namespace AddressBook
             Console.WriteLine("\nMarital Status:{0}", contact.MaritalStatus);
             Console.WriteLine("\nSalary:{0}", contact.Salary);
             Console.WriteLine("\nDate of Birth:{0}", contact.DateOfBirth.ToString("mm/dd/yyyy"));
-            Console.WriteLine("\nEmployed:{0}", contact.Employed ? "Yes": "No");
+            Console.WriteLine("\nHappy:{0}", contact.Happy? "Yes": "No");
             Console.WriteLine("\nCompany:{0}", contact.Company);
+            Console.WriteLine("\nSite Member:{0}", contact.SiteMember);
+            Console.WriteLine("\nWeb Page Url:{0}", contact.WebPageUrl.ToLower());
             Console.WriteLine("\n************************************");
         }
 
@@ -50,8 +52,10 @@ namespace AddressBook
                 Console.WriteLine("\nMarital Status:{0}", contact.MaritalStatus);
                 Console.WriteLine("\nSalary:{0}", contact.Salary);
                 Console.WriteLine("\nDate of Birth:{0}", contact.DateOfBirth.ToString("mm/dd/yyyy"));
-                Console.WriteLine("\nEmployed:{0}", contact.Employed ? "Yes" : "No");
+                Console.WriteLine("\nHappy:{0}", contact.Happy ? "Yes" : "No");
                 Console.WriteLine("\nCompany:{0}", contact.Company);
+                Console.WriteLine("\nSite Member:{0}", contact.SiteMember);
+                Console.WriteLine("\nWeb page Url:{0}", contact.WebPageUrl.ToLower());
                 Console.WriteLine("\n************************************"); 
             }
         }
@@ -91,32 +95,38 @@ namespace AddressBook
                         {
                             case Constants.ADD:
                                 Contact contactToAdd = new Contact(); 
-                                Console.Write("\nEnter Full Name:");
+                                Console.Write("\nEnter Full Name: ");
                                 contactToAdd.Name = Validate.GetName(Console.ReadLine());
-                                Console.Write("\nEnter Mobile Number:");
+                                Console.Write("\nEnter Mobile Number: ");
                                 contactToAdd.MobileNumber = Validate.GetMobileNumber(Console.ReadLine());
-                                Console.Write("\nEnter Address:");
+                                Console.Write("\nEnter Address: ");
                                 contactToAdd.Address = Validate.GetAddress();
-                                Console.Write("\nEnter Email Address:");
+                                Console.Write("\nEnter Email Address: ");
                                 contactToAdd.Email = Validate.GetEmail(Console.ReadLine());
 
-                                Console.Write("\nEnter Department:");
+                                Console.Write("\nEnter Department: ");
                                 contactToAdd.Department = Validate.GetDepartment(Console.ReadLine(),context);
 
-                                Console.Write("\nEnter Marital Status[Single|Married]:");
+                                Console.Write("\nEnter Marital Status[Single|Married]: ");
                                 contactToAdd.MaritalStatus = Validate.GetMaritalStatus(Console.ReadLine(), context);
 
                                 Console.Write("\nEnter Salary:");
                                 contactToAdd.Salary = Validate.GetSalary(Console.ReadLine());
 
-                                Console.Write("\nEnter Date Of Birth [mm/dd/yyyy] (yyyy = 1900-2099):");
+                                Console.Write("\nEnter Date Of Birth [mm/dd/yyyy] (yyyy = 1900-2099): ");
                                 contactToAdd.DateOfBirth = Validate.GetDateOfBirth(Console.ReadLine());
 
-                                Console.Write("\nAre you Employed? [Yes/No]: Press y for 'yes' and 'n' for 'no': ");
-                                contactToAdd.Employed = Validate.IsEmployed(Console.ReadLine());
+                                Console.Write("\nAre you Happy? Press y for 'yes' and 'n' for 'no': ");
+                                contactToAdd.Happy = Validate.IsHappy(Console.ReadLine());
 
                                 Console.Write("\nEnter Company: ");
                                 contactToAdd.Company = Validate.GetCompany(Console.ReadLine(),context);
+
+                                Console.Write("\nEnter name of Site Member: ");
+                                contactToAdd.SiteMember = Validate.GetSiteMember(Console.ReadLine(),context);
+
+                                Console.Write("\nEnter a Web Page Url: ");
+                                contactToAdd.WebPageUrl = Validate.GetWebPageUrl(Console.ReadLine(), context);
 
                                 contactToAdd = service.Add(contactToAdd, context);
 
@@ -178,7 +188,7 @@ namespace AddressBook
                                         contactToUpdate.Department = Validate.GetDepartment(input, context);
                                     }
 
-                                    Console.Write("\nEnter Marital Status[Single|Married]:");
+                                    Console.Write("\nEnter Marital Status[Single|Married]: ");
                                     input = Console.ReadLine();
                                     if(input!="")
                                     {
@@ -192,18 +202,18 @@ namespace AddressBook
                                         contactToUpdate.Salary = Validate.GetSalary(input);
                                     }
 
-                                    Console.Write("\nEnter Date of Birth[dd/mm/yyyy] (year = 1900-2099):");
+                                    Console.Write("\nEnter Date of Birth[dd/mm/yyyy] (year = 1900-2099): ");
                                     input = Console.ReadLine();
                                     if (input != "")
                                     {
                                         contactToUpdate.DateOfBirth = Validate.GetDateOfBirth(input);
                                     }
 
-                                    Console.Write("\nAre you Employed? [Yes/No]: Press y for 'yes' and 'n' for 'no': ");
+                                    Console.Write("\nAre you Happy? Press y for 'yes' and 'n' for 'no': ");
                                     input = Console.ReadLine();
                                     if (input != "")
                                     {
-                                        contactToUpdate.Employed = Validate.IsEmployed(input);
+                                        contactToUpdate.Happy = Validate.IsHappy(input);
                                     }
 
                                     Console.Write("\nEnter Company: ");
@@ -211,6 +221,20 @@ namespace AddressBook
                                     if (input != "")
                                     {
                                         contactToUpdate.Company = Validate.GetCompany(input, context);
+                                    }
+
+                                    Console.Write("\nEnter name of Site Member: "); 
+                                    input = Console.ReadLine(); 
+                                    if(input!= "")
+                                    {
+                                        contactToUpdate.SiteMember = Validate.GetSiteMember(input, context);
+                                    }
+
+                                    Console.Write("\nEnter a Web Page Url: ");
+                                    input = Console.ReadLine();
+                                    if (input != "")
+                                    {
+                                        contactToUpdate.WebPageUrl = Validate.GetWebPageUrl(input, context);
                                     }
 
                                     contactToUpdate = service.Update(_id,contactToUpdate, context);

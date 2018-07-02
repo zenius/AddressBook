@@ -14,8 +14,10 @@ namespace AddressBook
         public string MaritalStatus { get; set; }
         public double Salary { get; set; }
         public DateTime DateOfBirth { get; set; }
-        public bool Employed { get; set; }
+        public bool Happy { get; set; }
         public string Company { get; set; }
+        public string SiteMember { get; set; }
+        public string WebPageUrl { get; set; }
 
         public Contact() { }
 
@@ -24,13 +26,16 @@ namespace AddressBook
                         string Name, 
                         string MobileNumber, 
                         string Email, 
-                        string Address, 
+                        string Address,
+                        string Department,
                         string MaritalStatus, 
                         double Salary,
                         DateTime DateOfBirth,
-                        bool Employed,
-                        string Company,
-                        string Department
+                        bool Happy,
+                        string Company, 
+                        string SiteMember,
+                        string WebPageUrl
+                      
         )
         {
             this.Id = Id;
@@ -38,12 +43,14 @@ namespace AddressBook
             this.MobileNumber = MobileNumber;
             this.Email = Email;
             this.Address = Address;
+            this.Department = Department;
             this.MaritalStatus = MaritalStatus;
             this.Salary = Salary;
             this.DateOfBirth = DateOfBirth;
-            this.Employed = Employed;
+            this.Happy = Happy;
             this.Company = Company;
-            this.Department = Department; 
+            this.SiteMember = SiteMember;
+            this.WebPageUrl = WebPageUrl;
         }
     }
 }

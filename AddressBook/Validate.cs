@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.SharePoint.Client; 
 using Microsoft.SharePoint.Client.Taxonomy;
-using System.Globalization; 
+using System.Globalization;
 
 namespace AddressBook
 {
@@ -21,7 +22,7 @@ namespace AddressBook
                 }
                 else
                 {
-                    Console.Write("\nEnter Valid Option:");
+                    Console.Write("\nEnter Valid Option: ");
                 }
             }
             return input;
@@ -39,7 +40,7 @@ namespace AddressBook
                 }
                 else
                 {
-                    Console.Write("\nEnter Positive Number:");
+                    Console.Write("\nEnter Positive Number: ");
                 }
             }
             return input;
@@ -49,7 +50,7 @@ namespace AddressBook
         {
             while(name == "" || !Regex.IsMatch(name, Constants.namePattern))
             {
-                Console.Write("\nEnter the valid Name:");
+                Console.Write("\nEnter the valid Name: ");
                 name = Console.ReadLine(); 
             }
             return name;
@@ -59,7 +60,7 @@ namespace AddressBook
         {
             while (email == "" || !Regex.IsMatch(email, Constants.emailPattern))
             {
-                Console.Write("\nEnter Valid Email Address:");
+                Console.Write("\nEnter Valid Email Address: ");
                 email = Console.ReadLine(); 
             }
             return email;
@@ -69,7 +70,7 @@ namespace AddressBook
         {
             while (mobileNumber=="" || !Regex.IsMatch(mobileNumber, Constants.mobileNumberPattern))
             {
-                Console.Write("\nEnter 10 digit Mobile Number:");
+                Console.Write("\nEnter 10 digit Mobile Number: ");
                 mobileNumber = Console.ReadLine(); 
             }
             return mobileNumber;
@@ -107,16 +108,16 @@ namespace AddressBook
         { 
             while (!Regex.IsMatch(department, Constants.departmentPattern))
             {
-                Console.WriteLine("\nPlease Enter the Valid Department");
+                Console.WriteLine("\nPlease Enter the Valid Department: ");
                 department = Console.ReadLine();
             }
 
-            /**check to see whether the term exists or not**/
             bool doExist = false;
 
             Service service = new Service(); 
-            TermCollection termCollection = service.GetTermCollection(context); 
+            TermCollection termCollection = service.GetTermCollection(context);
 
+            /**check to see whether the term exists or not**/
             doExist = termCollection.Any(t => t.Name.ToUpper().Equals(department.ToUpper()));
 
             /** if the deparment does not exist
@@ -136,11 +137,13 @@ namespace AddressBook
             FieldChoice maritalStatusChoice = service.GetMaritalStatusChoices(context);
             var maritalStatusChoices = maritalStatusChoice.Choices;
 
-            while(!doExist && !Regex.IsMatch(maritalStatus, Constants.maritalStatusPattern))
+            doExist = maritalStatusChoices.Any(t => t.ToString().Equals(maritalStatus));
+
+            while (!doExist /*&& !Regex.IsMatch(maritalStatus, Constants.maritalStatusPattern)*/)
             {
-                Console.Write("\nPlease Enter the Valid maritalStatus [Single/Married]"); 
-                doExist = maritalStatusChoices.Any(t => t.ToString().ToUpper().Equals(maritalStatus.ToUpper()));
+                Console.Write("\nPlease Enter the Valid maritalStatus [Single/Married]: "); 
                 maritalStatus = Console.ReadLine();
+                doExist = maritalStatusChoices.Any(t => t.ToString().Equals(maritalStatus));
             }
 
             return maritalStatus; 
@@ -150,7 +153,7 @@ namespace AddressBook
         {
             while (salary == "" || !Regex.IsMatch(salary, Constants.salaryPattern))
             {
-                Console.Write("\nEnter the Valid Salary [positive number or positive number with decimal]:");
+                Console.Write("\nEnter the Valid Salary [positive number or positive number with decimal]: ");
                 salary = Console.ReadLine();
             }
             
@@ -163,27 +166,27 @@ namespace AddressBook
             string[] dateFormats = {"mm/dd/yyyy", "m/d/yyyy", "mm/d/yyyy","m/d/yyyy" }; 
             while(dateOfBirth =="" || !Regex.IsMatch(dateOfBirth, Constants.dateOfBirthPattern))
             {
-                Console.Write("\nEnter the Valid Date of Birth [mm/dd/yyyy] (yyyy = 1900-2099):");
+                Console.Write("\nEnter the Valid Date of Birth [mm/dd/yyyy] (yyyy = 1900-2099): ");
                 dateOfBirth = Console.ReadLine();
             }
 
            return DateTime.ParseExact(dateOfBirth, dateFormats, CultureInfo.InvariantCulture, DateTimeStyles.None); 
         }
 
-        public static bool IsEmployed(string employed)
+        public static bool IsHappy(string happy)
         {
-            bool isEmployed = false; 
-            while (!Regex.IsMatch(employed, Constants.employedPattern))
+            bool isHappy = false; 
+            while (!Regex.IsMatch(happy, Constants.happyPattern))
             {
-                Console.Write("\nPlease enter valid option");
-                Console.Write("\nAre you Employed? [Yes/No] Press y for 'yes' and 'n' for 'no': "); 
-                employed = Console.ReadLine();
+                Console.Write("\nPlease enter valid choice");
+                Console.Write("\nAre you Happy? Press y for 'yes' and 'n' for 'no': "); 
+                happy = Console.ReadLine();
             }
            
-            if(employed.Equals("y") || employed.Equals("Y"))  { isEmployed = true; }
-            else  if(employed.Equals("n") || employed.Equals("N")) { isEmployed = false; }
+            if(happy.Equals("y") || happy.Equals("Y"))  { isHappy = true; }
+            else  if(happy.Equals("n") || happy.Equals("N")) { isHappy = false; }
 
-            return isEmployed; 
+            return isHappy; 
         }
 
         public static string GetCompany(string company, Context context)
@@ -193,23 +196,64 @@ namespace AddressBook
             Service service = new Service();
             ListItemCollection lookupListItemCollection = service.GetListItemCollection(context,Constants.lookupListName);
 
-            Console.WriteLine("\nAvailable Company List");
-
-            foreach(ListItem _company in lookupListItemCollection)
-            {
-                Console.WriteLine("\n{0}",_company["Title"]); 
-            }
-
             doExist = lookupListItemCollection.Any(t => t[Constants.Title].ToString().Equals(company)); 
 
             while (!doExist /*&& !Regex.IsMatch(company, Constants.companyPattern)*/)
             {
+                Console.WriteLine("\nAvailable Company List");
+                foreach (ListItem _company in lookupListItemCollection)
+                {
+                    Console.WriteLine("\n{0}", _company[Constants.Title]);
+                }
                 Console.Write("\nPlease Enter the Valid Company Name: ");
                 company = Console.ReadLine();
                 doExist = lookupListItemCollection.Any(t => t[Constants.Title].ToString().Equals(company));
             }
 
             return company;
+        }
+
+        public static string GetSiteMember(string siteMember, Context context)
+        {
+            bool doExist = false;
+
+            Service service = new Service();
+            UserCollection userCollection = service.GetUserCollection(context, Constants.GroupName);
+
+            StringBuilder member = new StringBuilder();
+            member.Append(siteMember);
+            member.Append(Constants.DomainName); 
+
+            doExist = userCollection.Any(t => t.Email.ToString().Equals(member.ToString()));
+
+            while (!doExist)
+            {
+                Console.WriteLine("\nAvailable User Name List");
+
+                int index; 
+                foreach (User user in userCollection)
+                {
+                    index = user.Email.LastIndexOf("@"); 
+                    Console.WriteLine("\n{0}", user.Email.Remove(index));
+                }
+
+                Console.Write("\nPlease Enter the Valid User Name: ");
+                siteMember = Console.ReadLine();
+
+                doExist = userCollection.Any(t => t.Email.Remove(t.Email.LastIndexOf("@")).Equals(siteMember));
+            }
+
+            return siteMember;
+        }
+
+        public static string GetWebPageUrl(string webPageUrl,Context context)
+        {
+            while (webPageUrl == "" || !Regex.IsMatch(webPageUrl, Constants.webPageUrlPattern))
+            {
+                Console.Write("\nEnter Valid Web Page Url: ");
+                webPageUrl = Console.ReadLine();
+            }
+            return webPageUrl;
         }
 
         public static char GetValidChoice()

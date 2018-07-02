@@ -14,56 +14,72 @@ namespace AddressBook
         {
             ListItemCreationInformation itemToAdd = new ListItemCreationInformation();
             List list = GetList(context, Constants.listName);
-
             ListItem newItem = list.AddItem(itemToAdd);
 
-             FieldLookupValue lookup = new FieldLookupValue();
-             lookup.LookupId = GetLookupListItemId(contact.Company, context);
+            Term term = GetTerm(contact.Department, context);
+            
+            /**Get the lookup with the its loookup id**/
+            FieldLookupValue lookup = new FieldLookupValue() { LookupId = GetLookupListItemId(contact.Company, context) };
 
-            /**pass lookup id to update the lookup field value**/
-             newItem[Constants.LookupCompany] = lookup.LookupId;
+            /**Get the user from the user group**/
+            User user = GetUser(context,contact.SiteMember); 
 
-             newItem.Update();
+            newItem[Constants.FullName] = contact.Name;
+            newItem[Constants.Email] = contact.Email;
+            newItem[Constants.WorkAddress] = contact.Address;
+            newItem[Constants.CellPhone] = contact.MobileNumber;
 
             /**changing the managed term value to the suitable format: "-1;managedTermValue|guid" **/
-            newItem[Constants.Department] = String.Concat("-1;#", contact.Department,
-                                                 "|", GetTerm(contact.Department.ToUpper(), context).Id.ToString());
+            newItem[Constants.Department] = String.Format("-1;#{0}{1}{2}", contact.Department, "|", term.Id);
 
-             newItem[Constants.FullName] = contact.Name;
-             newItem[Constants.Email] = contact.Email;
-             newItem[Constants.WorkAddress] = contact.Address;
-             newItem[Constants.CellPhone] = contact.MobileNumber;
-             newItem[Constants.MaritalStatus] = contact.MaritalStatus;
-             newItem[Constants.Salary] = contact.Salary;
-             newItem[Constants.DateOfBirth] = contact.DateOfBirth;
-             newItem[Constants.Employed] = contact.Employed;
+            newItem[Constants.MaritalStatus] = contact.MaritalStatus;
+            newItem[Constants.Salary] = contact.Salary;
+            newItem[Constants.DateOfBirth] = contact.DateOfBirth;
+            newItem[Constants.Happy] = contact.Happy;
+            newItem[Constants.LookupCompany] = lookup;
 
-             newItem.Update();
-             context.clientContext.ExecuteQuery();
+            /**changing the user group column to the format: id;#userLoginName**/
+            newItem[Constants.SiteMembers] = String.Format("{0};#{1}",user.Id,user.LoginName);
 
-             contact.Id = newItem.Id;
-             return contact;
+            newItem[Constants.WebPage] = contact.WebPageUrl.ToLower();
+
+            newItem.Update();
+            context.clientContext.ExecuteQuery();
+           
+            contact.Id = newItem.Id;
+            return contact;
          }
 
          public Contact Update(int id, Contact contact, Context context)
          {
-             ListItem itemToUpdate = GetItem(id, context);
+            ListItem itemToUpdate = GetItem(id, context);
 
-            FieldLookupValue lookupValue = new FieldLookupValue();
-            lookupValue.LookupId = GetLookupListItemId(contact.Company, context);
-            itemToUpdate[Constants.LookupCompany] = lookupValue.LookupId;
+            Term term = GetTerm(contact.Department, context);
+            
+            /**Get the lookup with the its loookup id**/
+            FieldLookupValue lookup = new FieldLookupValue() { LookupId = GetLookupListItemId(contact.Company, context) };
 
-            itemToUpdate.Update(); 
+            /**Get the user from the user group**/
+            User user = GetUser(context, contact.SiteMember);
 
-            itemToUpdate[Constants.Department] = "-1;#" + contact.Department + "|" + GetTerm(contact.Department.ToUpper(), context).Id.ToString();
             itemToUpdate[Constants.FullName] = contact.Name;
             itemToUpdate[Constants.CellPhone] = contact.MobileNumber;
             itemToUpdate[Constants.WorkAddress] = contact.Address;
             itemToUpdate[Constants.Email] = contact.Email;
+            
+            /**changing the managed term value to the suitable format: "-1;managedTermValue|guid" **/
+            itemToUpdate[Constants.Department] = String.Format("-1;#{0}{1}{2}", contact.Department, "|", term.Id);
+
             itemToUpdate[Constants.MaritalStatus] = contact.MaritalStatus;
             itemToUpdate[Constants.Salary] = contact.Salary;
             itemToUpdate[Constants.DateOfBirth] = contact.DateOfBirth;
-            itemToUpdate[Constants.Employed] = contact.Employed.ToString();
+            itemToUpdate[Constants.Happy] = contact.Happy.ToString();
+            itemToUpdate[Constants.LookupCompany] = lookup;
+
+            /**changing the user group column to the format: id;#userLoginName**/
+            itemToUpdate[Constants.SiteMembers] = String.Format("{0};#{1}", user.Id, user.LoginName);
+
+            itemToUpdate[Constants.WebPage] = contact.WebPageUrl.ToLower();
 
             itemToUpdate.Update();
 
@@ -98,11 +114,17 @@ namespace AddressBook
             contact.MaritalStatus = item[Constants.MaritalStatus].ToString();
             contact.Salary = Convert.ToDouble(item[Constants.Salary].ToString());
             contact.DateOfBirth = Convert.ToDateTime(item[Constants.DateOfBirth].ToString());
-            contact.Employed = Convert.ToBoolean(item[Constants.Employed].ToString());
+            contact.Happy = Convert.ToBoolean(item[Constants.Happy].ToString());
 
             TaxonomyFieldValue taxonomyFieldValue = item[Constants.Department] as TaxonomyFieldValue;
             contact.Department = taxonomyFieldValue.Label;
 
+            FieldUserValue fieldUserValue = item[Constants.SiteMembers] as FieldUserValue;
+            contact.SiteMember = fieldUserValue.LookupValue;
+
+            FieldUrlValue fieldUrlValue = item[Constants.WebPage] as FieldUrlValue; 
+            contact.WebPageUrl = fieldUrlValue.Url; 
+            
             return contact;
         }
 
@@ -114,19 +136,22 @@ namespace AddressBook
             {
                 TaxonomyFieldValue taxonomyFieldValue = item[Constants.Department] as TaxonomyFieldValue;
                 FieldLookupValue LookupCompanyValue = item[Constants.LookupCompany] as FieldLookupValue;
+                FieldUserValue fieldUserValue = item[Constants.SiteMembers] as FieldUserValue; 
+                FieldUrlValue fieldUrlValue = item[Constants.WebPage] as FieldUrlValue; 
                 AllContacts.Add(new Contact(
                         item.Id,
                         item[Constants.FullName].ToString(),
                         item[Constants.CellPhone].ToString(),
                         item[Constants.WorkAddress].ToString(),
                         item[Constants.Email].ToString(),
+                        taxonomyFieldValue.Label,
                         item[Constants.MaritalStatus].ToString(),
                         Convert.ToDouble(item[Constants.Salary].ToString()),
                         Convert.ToDateTime(item[Constants.DateOfBirth].ToString()),
-                        Convert.ToBoolean(item[Constants.Employed].ToString()),
-
-                        LookupCompanyValue.LookupValue,  /**we can make this name generic**/
-                        taxonomyFieldValue.Label
+                        Convert.ToBoolean(item[Constants.Happy].ToString()),
+                        LookupCompanyValue.LookupValue,  /**note: we can make this name generic**/
+                        fieldUserValue.LookupValue,
+                        fieldUrlValue.Url
                     ));
             }
             return AllContacts;
@@ -166,8 +191,6 @@ namespace AddressBook
             List list = web.Lists.GetByTitle(listName);
 
             context.clientContext.Load(list);
-
-            context.clientContext.ExecuteQuery();
             return list;
         }
 
@@ -237,9 +260,28 @@ namespace AddressBook
 
             TermStore termStore = GetTermStore(context);
             termStore.CommitAll();
+            context.clientContext.Load(newTerm);
 
-            context.clientContext.Load(GetTermCollection(context));
             context.clientContext.ExecuteQuery();
+        }
+
+        public User GetUser(Context context,string siteMemberName)
+        {
+            UserCollection userCollection = GetUserCollection(context,Constants.GroupName);
+            return userCollection.SingleOrDefault(t => t.Email.Remove(t.Email.LastIndexOf("@")).Equals(siteMemberName));
+        }
+
+        public UserCollection GetUserCollection(Context context, string groupName)
+        {
+            GroupCollection groupCollection = context.clientContext.Web.SiteGroups;
+            Group group = groupCollection.GetByName(groupName);
+            UserCollection userCollection = group.Users;
+
+            context.clientContext.Load(userCollection);
+
+            context.clientContext.ExecuteQuery();
+
+            return userCollection;  
         }
 
         public bool doIdExist(int id, Context context)
