@@ -19,38 +19,5 @@ namespace AddressBook
         public string SiteMember { get; set; }
         public string WebPageUrl { get; set; }
 
-        public Contact() { }
-
-        public Contact( 
-                        int Id, 
-                        string Name, 
-                        string MobileNumber, 
-                        string Email, 
-                        string Address,
-                        string Department,
-                        string MaritalStatus, 
-                        double Salary,
-                        DateTime DateOfBirth,
-                        bool Happy,
-                        string Company, 
-                        string SiteMember,
-                        string WebPageUrl
-                      
-        )
-        {
-            this.Id = Id;
-            this.Name = Name;
-            this.MobileNumber = MobileNumber;
-            this.Email = Email;
-            this.Address = Address;
-            this.Department = Department;
-            this.MaritalStatus = MaritalStatus;
-            this.Salary = Salary;
-            this.DateOfBirth = DateOfBirth;
-            this.Happy = Happy;
-            this.Company = Company;
-            this.SiteMember = SiteMember;
-            this.WebPageUrl = WebPageUrl;
-        }
     }
 }

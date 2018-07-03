@@ -8,8 +8,6 @@ namespace AddressBook
 {
     class Service
     {
-        List<Contact> AllContacts = new List<Contact>();
-
         public Contact Add(Contact contact, Context context)
         {
             ListItemCreationInformation itemToAdd = new ListItemCreationInformation();
@@ -134,30 +132,15 @@ namespace AddressBook
         public List<Contact> GetAllContacts(Context context)
         {
             ListItemCollection listItemCollection = GetListItemCollection(context,Constants.listName);
-
+            List<Contact> allContacts = new List<Contact>();
             foreach (ListItem item in listItemCollection)
             {
-                TaxonomyFieldValue taxonomyFieldValue = item[Constants.Department] as TaxonomyFieldValue;
-                FieldLookupValue LookupCompanyValue = item[Constants.LookupCompany] as FieldLookupValue;
-                FieldUserValue fieldUserValue = item[Constants.SiteMembers] as FieldUserValue; 
-                FieldUrlValue fieldUrlValue = item[Constants.WebPage] as FieldUrlValue; 
-                AllContacts.Add(new Contact(
-                        item.Id,
-                        item[Constants.FullName].ToString(),
-                        item[Constants.CellPhone].ToString(),
-                        item[Constants.WorkAddress].ToString(),
-                        item[Constants.Email].ToString(),
-                        taxonomyFieldValue.Label,
-                        item[Constants.MaritalStatus].ToString(),
-                        Convert.ToDouble(item[Constants.Salary].ToString()),
-                        Convert.ToDateTime(item[Constants.DateOfBirth].ToString()),
-                        Convert.ToBoolean(item[Constants.Happy].ToString()),
-                        LookupCompanyValue.LookupValue,  /**note: we can make this name generic**/
-                        fieldUserValue.LookupValue,
-                        fieldUrlValue.Url
-                    ));
+                Contact contact = new Contact();
+                contact = GetContact(item.Id, context, contact);
+
+                allContacts.Add(contact);
             }
-            return AllContacts;
+            return allContacts;
         }
 
         /**Note: make this function name more generic**/
@@ -181,9 +164,7 @@ namespace AddressBook
         public int GetLookupListItemId(string lookupFieldValue, Context context)
         {
             ListItemCollection lookupListItemCollection = GetListItemCollection(context, Constants.lookupListName);
-
             return lookupListItemCollection.SingleOrDefault(item => item[Constants.Title].Equals(lookupFieldValue)).Id;
-
         }
 
         public List GetList(Context context, string listName)
@@ -201,7 +182,9 @@ namespace AddressBook
         {
             List list = GetList(context,listName);
             CamlQuery query = new CamlQuery();
-            query.ViewXml = "<View/>";
+            query.ViewXml = "<View/>";  /**currently, this line is optional
+            
+             * TODO: intiialize only the specific fields**/
 
             ListItemCollection listItemCollection = list.GetItems(query);
 
