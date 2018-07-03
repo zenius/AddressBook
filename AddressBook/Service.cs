@@ -41,7 +41,7 @@ namespace AddressBook
             /**changing the user group column to the format: id;#userLoginName**/
             newItem[Constants.SiteMembers] = String.Format("{0};#{1}",user.Id,user.LoginName);
 
-            newItem[Constants.WebPage] = contact.WebPageUrl.ToLower();
+            newItem[Constants.WebPage] = contact.WebPageUrl;
 
             newItem.Update();
             context.clientContext.ExecuteQuery();
@@ -79,7 +79,7 @@ namespace AddressBook
             /**changing the user group column to the format: id;#userLoginName**/
             itemToUpdate[Constants.SiteMembers] = String.Format("{0};#{1}", user.Id, user.LoginName);
 
-            itemToUpdate[Constants.WebPage] = contact.WebPageUrl.ToLower();
+            itemToUpdate[Constants.WebPage] = contact.WebPageUrl;
 
             itemToUpdate.Update();
 
@@ -116,12 +116,15 @@ namespace AddressBook
             contact.DateOfBirth = Convert.ToDateTime(item[Constants.DateOfBirth].ToString());
             contact.Happy = Convert.ToBoolean(item[Constants.Happy].ToString());
 
+            /**For managed metadata column**/
             TaxonomyFieldValue taxonomyFieldValue = item[Constants.Department] as TaxonomyFieldValue;
             contact.Department = taxonomyFieldValue.Label;
 
+            /**for Person or Group Column**/
             FieldUserValue fieldUserValue = item[Constants.SiteMembers] as FieldUserValue;
             contact.SiteMember = fieldUserValue.LookupValue;
-
+           
+            /**for Hyperlink or picture column**/
             FieldUrlValue fieldUrlValue = item[Constants.WebPage] as FieldUrlValue; 
             contact.WebPageUrl = fieldUrlValue.Url; 
             
@@ -268,7 +271,7 @@ namespace AddressBook
         public User GetUser(Context context,string siteMemberName)
         {
             UserCollection userCollection = GetUserCollection(context,Constants.GroupName);
-            return userCollection.SingleOrDefault(t => t.Email.Remove(t.Email.LastIndexOf("@")).Equals(siteMemberName));
+            return userCollection.SingleOrDefault(t => t.Title.Equals(siteMemberName));
         }
 
         public UserCollection GetUserCollection(Context context, string groupName)

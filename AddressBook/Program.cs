@@ -33,7 +33,7 @@ namespace AddressBook
             Console.WriteLine("\nHappy:{0}", contact.Happy? "Yes": "No");
             Console.WriteLine("\nCompany:{0}", contact.Company);
             Console.WriteLine("\nSite Member:{0}", contact.SiteMember);
-            Console.WriteLine("\nWeb Page Url:{0}", contact.WebPageUrl.ToLower());
+            Console.WriteLine("\nWeb Page Url:{0}", contact.WebPageUrl);
             Console.WriteLine("\n************************************");
         }
 
@@ -55,7 +55,7 @@ namespace AddressBook
                 Console.WriteLine("\nHappy:{0}", contact.Happy ? "Yes" : "No");
                 Console.WriteLine("\nCompany:{0}", contact.Company);
                 Console.WriteLine("\nSite Member:{0}", contact.SiteMember);
-                Console.WriteLine("\nWeb page Url:{0}", contact.WebPageUrl.ToLower());
+                Console.WriteLine("\nWeb page Url:{0}", contact.WebPageUrl);
                 Console.WriteLine("\n************************************"); 
             }
         }

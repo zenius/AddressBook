@@ -220,27 +220,26 @@ namespace AddressBook
             Service service = new Service();
             UserCollection userCollection = service.GetUserCollection(context, Constants.GroupName);
 
-            StringBuilder member = new StringBuilder();
-            member.Append(siteMember);
-            member.Append(Constants.DomainName); 
+            //StringBuilder member = new StringBuilder();
+            //member.Append(siteMember);
+            //member.Append(Constants.DomainName); 
 
-            doExist = userCollection.Any(t => t.Email.ToString().Equals(member.ToString()));
+            string member = string.Format("{0}{1}", siteMember, Constants.DomainName);
+
+            doExist = userCollection.Any(t => t.Title.Equals(member));
 
             while (!doExist)
             {
-                Console.WriteLine("\nAvailable User Name List");
-
-                int index; 
+                Console.WriteLine("\nAvailable User Name List"); 
                 foreach (User user in userCollection)
-                {
-                    index = user.Email.LastIndexOf("@"); 
-                    Console.WriteLine("\n{0}", user.Email.Remove(index));
+                { 
+                    Console.WriteLine("\n{0}", user.Title);
                 }
 
                 Console.Write("\nPlease Enter the Valid User Name: ");
                 siteMember = Console.ReadLine();
 
-                doExist = userCollection.Any(t => t.Email.Remove(t.Email.LastIndexOf("@")).Equals(siteMember));
+                doExist = userCollection.Any(t => t.Title.Equals(siteMember));
             }
 
             return siteMember;
@@ -253,7 +252,7 @@ namespace AddressBook
                 Console.Write("\nEnter Valid Web Page Url: ");
                 webPageUrl = Console.ReadLine();
             }
-            return webPageUrl;
+            return webPageUrl.ToLower();
         }
 
         public static char GetValidChoice()
